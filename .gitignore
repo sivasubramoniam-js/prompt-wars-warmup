@@ -1,0 +1,27 @@
+# Environments
+node_modules/
+venv/
+env/
+.env
+.env.*
+.DS_Store
+
+# Google Cloud SDK
+google-cloud-sdk/
+google-cloud-cli-*
+*.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build / Output
+dist/
+build/
+.npm/
+
+# IDE
+.vscode/
+.idea/
