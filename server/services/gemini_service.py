@@ -8,10 +8,11 @@ import uuid
 from datetime import datetime
 
 class EmergencyResponse(BaseModel):
-    urgency_level: str = Field(description="Must be 'Red', 'Yellow', or 'Green'")
-    immediate_actions: list[str] = Field(description="Ranked list of top 3-5 safety steps")
-    evacuation_plan: str = Field(description="Nearest shelter type and route guidance description based on context")
-    shareable_safety_card: str = Field(description="A short, concise summary for family WhatsApp groups")
+    is_emergency: bool = Field(description="Boolean True if catastrophic risk is confirmed, False if monitored or safe.")
+    status: str = Field(description="Must return 'emergency' if active threat exists, else 'stable' or 'monitored'.")
+    immediate_actions: list[str] = Field(description="Ranked list of survival or precautionary steps (strings).")
+    instruction: str = Field(description="Concise tactical instruction for people in the immediate vicinity.")
+    contact_instructions: str = Field(description="Emergency helpline numbers, broadcast frequency, or shelter directions.")
 
 class EnrichedSignal(BaseModel):
     id: str

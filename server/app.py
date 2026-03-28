@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_talisman import Talisman
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 from services.gemini_service import analyze_emergency, enrich_signals
 import os
@@ -11,20 +14,53 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-# Enable CORS for the local Vite dev server
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Security: Enable CORS safely
+CORS(app, resources={r"/api/*": {"origins": "*"}}) # In production, restrict this to specific domains
+
+# Security: Add Secure Headers with Talisman
+csp = {
+    'default-src': [
+        '\'self\'',
+        '*.google.com',
+        '*.googleapis.com',
+        '*.google-analytics.com',
+        '*.gstatic.com',
+        'data:',
+        'blob:'
+    ],
+    'script-src': ['\'self\'', '\'unsafe-inline\'', '*.google.com', '*.googleapis.com'],
+    'style-src': ['\'self\'', '\'unsafe-inline\'', '*.googleapis.com', 'fonts.googleapis.com'],
+    'img-src': ['\'self\'', 'data:', 'blob:', '*.google.com', '*.googleapis.com', '*.gstatic.com', 'wttr.in']
+}
+Talisman(app, content_security_policy=None, force_https=False) # force_https=False for local development to avoid ERR_SSL_PROTOCOL_ERROR
+
+# Security: Rate Limiting
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/api/upload', methods=['POST'])
+@limiter.limit("10 per minute")
 def upload_files():
     image_path = None
     audio_path = None
     try:
-        text_input = request.form.get('text', '')
+        text_input = request.form.get('text', '').strip()
         
+        # Validation
+        if not text_input and 'image' not in request.files and 'audio' not in request.files:
+            return jsonify({"error": "Minimum context required (text, image, or audio)."}), 400
+            
         image_file = request.files.get('image')
         audio_file = request.files.get('audio')
         
-        # Save temp files securely so the genai sdk can upload them
+        # Save temp files securely
         if image_file and image_file.filename != '':
             os.makedirs('/tmp/uploads', exist_ok=True)
             filename = secure_filename(image_file.filename)
@@ -42,27 +78,21 @@ def upload_files():
         
     except Exception as e:
         app.logger.error(f"Error processing upload: {e}")
-        return jsonify({"error": "Failed to analyze emergency efficiently. See backend logs."}), 500
+        return jsonify({"error": "Failed to analyze emergency. See backend logs."}), 500
         
     finally:
-        # GUARANTEED EFFICIENCY & SECURITY CLEANUP
+        # Security Cleanup
         if image_path and os.path.exists(image_path):
-            try:
-                os.remove(image_path)
-            except OSError as e:
-                app.logger.warning(f"Could not remove secure image upload: {e}")
+            try: os.remove(image_path)
+            except: pass
                 
         if audio_path and os.path.exists(audio_path):
-            try:
-                os.remove(audio_path)
-            except OSError as e:
-                app.logger.warning(f"Could not remove secure audio upload: {e}")
+            try: os.remove(audio_path)
+            except: pass
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
-    feeds = {
-        "GDACS": "https://www.gdacs.org/xml/rss.xml",
-    }
+    feeds = {"GDACS": "https://www.gdacs.org/xml/rss.xml"}
     news_items = []
     for source, url in feeds.items():
         try:
@@ -73,55 +103,41 @@ def get_news():
                     "summary": entry.description,
                     "link": entry.link,
                     "source": source,
-                    "date": entry.published if hasattr(entry, 'published') else 'N/A'
+                    "date": entry.published[:16] if hasattr(entry, 'published') else 'N/A'
                 })
         except Exception as e:
-            app.logger.error(f"Error fetching {source}: {e}")
+            app.logger.error(f"Error fetching news: {e}")
     return jsonify(news_items)
 
 @app.route('/api/alerts', methods=['GET'])
 def get_alerts():
     try:
+        # In a real app, this would query a DB or government API
         alerts = [
-            {
-                "id": 1,
-                "title": "Severe Heatwave Alert",
-                "region": "Northern Karnataka",
-                "severity": "Orange",
-                "source": "IMD",
-                "details": "Expect temperatures above 42°C for the next 48 hours."
-            },
-            {
-                "id": 2,
-                "title": "Flood Warning",
-                "region": "Assam Valley",
-                "severity": "Red",
-                "source": "NDMA",
-                "details": "Major rivers flowing above danger levels. Evacuation in progress."
-            }
+            {"id": 1, "title": "Severe Heatwave Alert", "region": "Northern Karnataka", "severity": "Orange", "source": "IMD", "details": "Expect temperatures above 42°C."},
+            {"id": 2, "title": "Flood Warning", "region": "Assam Valley", "severity": "Red", "source": "NDMA", "details": "Rivers flowing above danger levels."}
         ]
         return jsonify(alerts)
-    except Exception as e:
+    except Exception:
         return jsonify([])
 
 from services.telegram_service import send_telegram_alert, format_signal_for_telegram
 
 @app.route('/api/telegram/alert', methods=['POST'])
+@limiter.limit("5 per minute")
 def telegram_alert():
     data = request.json
     signal = data.get('signal')
     chat_id = data.get('chat_id')
     if not signal or not chat_id:
-        return jsonify({"error": "Missing signal or chat_id"}), 400
+        return jsonify({"error": "Missing critical dispatch details."}), 400
+        
     message = format_signal_for_telegram(signal)
     success = send_telegram_alert(chat_id, message)
-    if success:
-        return jsonify({"success": True})
-    return jsonify({"error": "Failed to send Telegram alert"}), 500
+    return jsonify({"success": success})
 
 @app.route('/api/signals', methods=['GET'])
 def get_signals():
-    """Restored feed-based discovery with Gemini enrichment."""
     range_days = request.args.get('range', '1')
     signals = []
     
@@ -134,21 +150,18 @@ def get_signals():
 
     try:
         feed = feedparser.parse(usgs_url)
-        limit = 8 if range_days == "1" else 15
+        limit = 10 if range_days == "1" else 20
         for entry in feed.entries[:limit]:
             point = entry.get('georss_point', '0 0').split()
             title = entry.title
             signals.append({
-                "id": entry.id,
-                "type": "EARTHQUAKE",
-                "title": title,
-                "lat": float(point[0]),
-                "lng": float(point[1]),
-                "severity": "Red" if any(v in title for v in ["M 6.", "M 7.", "M 8."]) else "Orange" if "M 5." in title or "M 4." in title else "Green",
-                "date": entry.updated
+                "id": entry.id, "type": "EARTHQUAKE", "title": title,
+                "lat": float(point[0]), "lng": float(point[1]),
+                "severity": "Red" if any(v in title for v in ["M 6.", "M 7."]) else "Orange" if "M 5." in title else "Green",
+                "date": entry.updated[:16]
             })
     except Exception as e:
-        app.logger.error(f"USGS Fetch Error: {e}")
+        app.logger.warning(f"USGS Feed issue: {e}")
 
     try:
         gdacs_url = "https://www.gdacs.org/xml/rss.xml"
@@ -156,38 +169,30 @@ def get_signals():
         for entry in feed.entries[:5]:
             if hasattr(entry, 'geo_lat'):
                 signals.append({
-                    "id": entry.link,
-                    "type": "NATURAL",
-                    "title": entry.title,
-                    "lat": float(entry.geo_lat),
-                    "lng": float(entry.geo_long),
+                    "id": entry.link, "type": "NATURAL", "title": entry.title,
+                    "lat": float(entry.geo_lat), "lng": float(entry.geo_long),
                     "severity": "Red" if "Red" in entry.title else "Orange",
-                    "date": entry.published if hasattr(entry, 'published') else "N/A"
+                    "date": entry.published[:16] if hasattr(entry, 'published') else "N/A"
                 })
-    except Exception as e:
-        app.logger.error(f"GDACS Fetch Error: {e}")
+    except: pass
 
-    enriched_signals = enrich_signals(signals)
-    return jsonify({"signals": enriched_signals})
+    enriched = enrich_signals(signals)
+    return jsonify({"signals": enriched})
 
 @app.route('/api/weather', methods=['GET'])
+@limiter.limit("30 per minute")
 def get_weather():
-    city = request.args.get('city', 'Bangalore')
+    city = secure_filename(request.args.get('city', 'Bangalore')) # Basic sanitization
     try:
         resp = requests.get(f"https://wttr.in/{city}?format=j1", timeout=10)
         data = resp.json()
         current = data['current_condition'][0]
         return jsonify({
-            "city": city,
-            "temp": current['temp_C'],
-            "desc": current['weatherDesc'][0]['value'],
-            "humidity": current['humidity'],
-            "wind": current['windspeedKmph'],
-            "precip": current['precipMM']
+            "city": city, "temp": current['temp_C'], "desc": current['weatherDesc'][0]['value'],
+            "humidity": current['humidity'], "wind": current['windspeedKmph'], "precip": current['precipMM']
         })
-    except Exception as e:
-        app.logger.error(f"Weather Fetch Error: {e}")
+    except Exception:
         return jsonify({"error": "Weather data unavailable"}), 500
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=False) # Turned off debug for cleaner prod deployment

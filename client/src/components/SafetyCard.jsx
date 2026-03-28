@@ -6,43 +6,28 @@ export default function SafetyCard({ data }) {
   const { t } = useTranslation();
   if (!data) return null;
 
-  const { urgency_level, immediate_actions, shareable_safety_card } = data;
+  const { is_emergency, status, immediate_actions, instruction, contact_instructions } = data;
 
-  let colors = {
+  const colors = status == 'emergency' ? {
+    bg: 'bg-red-500/10',
+    border: 'border-red-500/40',
+    text: 'text-red-600 dark:text-red-400',
+    icon: <AlertTriangle className="text-red-500" size={40} />,
+    badge: 'bg-red-500',
+    gradient: 'from-red-500/20 to-transparent'
+  } : {
     bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
+    border: 'border-green-500/40',
     text: 'text-green-600 dark:text-green-400',
     icon: <CheckCircle2 className="text-green-500" size={40} />,
     badge: 'bg-green-500',
-    gradient: 'from-green-500/10 to-transparent'
+    gradient: 'from-green-500/20 to-transparent'
   };
-
-  const statusLower = (urgency_level || '').toLowerCase();
-  
-  if (statusLower === 'red') {
-    colors = {
-      bg: 'bg-red-500/10',
-      border: 'border-red-500/20',
-      text: 'text-red-600 dark:text-red-400',
-      icon: <AlertTriangle className="text-red-500" size={40} />,
-      badge: 'bg-red-500',
-      gradient: 'from-red-500/10 to-transparent'
-    };
-  } else if (statusLower === 'yellow') {
-    colors = {
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/20',
-      text: 'text-yellow-600 dark:text-yellow-400',
-      icon: <AlertTriangle className="text-yellow-500" size={40} />,
-      badge: 'bg-yellow-500',
-      gradient: 'from-yellow-500/10 to-transparent'
-    };
-  }
 
   return (
     <div className={`glass-panel border-l-8 ${colors.border} overflow-hidden relative animate-in fade-in slide-in-from-bottom-8 duration-700`}>
       <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b ${colors.gradient} opacity-30 pointer-events-none`}></div>
-      
+
       <div className="relative z-10 p-6 sm:p-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-6">
@@ -50,9 +35,9 @@ export default function SafetyCard({ data }) {
               {colors.icon}
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-50 mb-2 truncate">{t('urgency_level')}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-50 mb-2 truncate">{t('status')}</p>
               <h2 className={`text-4xl font-black tracking-tight flex items-center gap-4 ${colors.text}`}>
-                {(urgency_level || 'Normal').toUpperCase()}
+                {(status || 'Normal').toUpperCase()}
                 <span className="relative flex h-3 w-3">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${colors.badge}`}></span>
                   <span className={`relative inline-flex rounded-full h-3 w-3 ${colors.badge}`}></span>
@@ -84,15 +69,15 @@ export default function SafetyCard({ data }) {
               <h3 className="text-xs font-bold opacity-50 uppercase tracking-widest flex items-center gap-2">
                 <Share2 size={16} /> {t('shareable_card')}
               </h3>
-              <button 
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2" 
-                onClick={() => navigator.clipboard.writeText(shareable_safety_card)}
+              <button
+                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                onClick={() => navigator.clipboard.writeText(contact_instructions || instruction)}
               >
                 <Copy size={14} /> Copy for emergency broadcast
               </button>
             </div>
             <p className="text-xl italic font-serif leading-relaxed px-4 border-l-4 border-blue-500/50">
-              "{shareable_safety_card}"
+              "{contact_instructions || instruction}"
             </p>
           </div>
         </div>

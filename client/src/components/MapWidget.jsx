@@ -158,17 +158,19 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
               </span>
            </div>
 
-           <div className="flex p-1 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800">
-              {rangeOptions.map((opt) => (
-                 <button
-                    key={opt.value}
-                    onClick={() => setRange(opt.value)}
-                    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${range === opt.value ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600' : 'opacity-40 hover:opacity-100'}`}
-                 >
-                    {opt.label}
-                 </button>
-              ))}
-           </div>
+            <div className="flex p-1 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800" role="group" aria-label="Time range results">
+               {rangeOptions.map((opt) => (
+                  <button
+                     key={opt.value}
+                     onClick={() => setRange(opt.value)}
+                     aria-pressed={range === opt.value}
+                     aria-label={`Show disasters from ${opt.label}`}
+                     className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${range === opt.value ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600' : 'opacity-40 hover:opacity-100'}`}
+                  >
+                     {opt.label}
+                  </button>
+               ))}
+            </div>
         </div>
       </div>
       
@@ -333,6 +335,7 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
                        disabled={telegramStatus === 'sending'}
                        className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95 disabled:opacity-50"
                        title="Dispatch to Telegram"
+                       aria-label={`Dispatch alert for ${sig.title} to Telegram`}
                      >
                         <Send size={14} />
                      </button>
