@@ -23,13 +23,13 @@ def upload_files():
         
         # Save temp files so the genai sdk can upload them
         if image_file and image_file.filename != '':
-            os.makedirs('tmp', exist_ok=True)
-            image_path = f"tmp/{image_file.filename}"
+            os.makedirs('/tmp/uploads', exist_ok=True)
+            image_path = f"/tmp/uploads/{image_file.filename}"
             image_file.save(image_path)
             
         if audio_file and audio_file.filename != '':
-            os.makedirs('tmp', exist_ok=True)
-            audio_path = f"tmp/{audio_file.filename}"
+            os.makedirs('/tmp/uploads', exist_ok=True)
+            audio_path = f"/tmp/uploads/{audio_file.filename}"
             audio_file.save(audio_path)
             
         result = analyze_emergency(text_input, image_path, audio_path)
