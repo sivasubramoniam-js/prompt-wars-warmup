@@ -1,47 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-primary: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(226, 232, 240, 1);
+    --input-bg: #ffffff;
+    --accent-glow: rgba(37, 99, 235, 0.05);
+  }
+
+  .dark {
+    --bg-primary: #020617;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --card-bg: rgba(15, 23, 42, 0.7);
+    --card-border: rgba(30, 41, 59, 0.8);
+    --input-bg: rgba(2, 6, 23, 0.3);
+    --accent-glow: rgba(37, 99, 235, 0.1);
+  }
+
   body {
-    @apply bg-slate-950 text-slate-50 antialiased selection:bg-blue-500/30;
-    background-image: radial-gradient(circle at top right, #1e293b, transparent 40%),
-                      radial-gradient(circle at bottom left, #0f172a, transparent 40%);
-    background-attachment: fixed;
+    @apply antialiased transition-colors duration-300;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-2xl;
+    @apply backdrop-blur-2xl border transition-all duration-300;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
   }
   
   .btn-primary {
-    @apply relative overflow-hidden bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_25px_rgba(59,130,246,0.6)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none;
+    @apply relative overflow-hidden bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-secondary {
-    @apply bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-slate-700 active:scale-[0.98];
+    @apply font-semibold py-3 px-6 rounded-2xl transition-all duration-300 border active:scale-[0.98] flex items-center justify-center gap-2;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    color: var(--text-primary);
   }
 
   .input-field {
-    @apply w-full bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all;
+    @apply w-full border outline-none rounded-2xl px-5 py-4 transition-all focus:ring-4 focus:ring-blue-500/10;
+    background-color: var(--input-bg);
+    border-color: var(--card-border);
+    color: var(--text-primary);
   }
 
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  .nav-blur {
+    @apply sticky top-0 z-50 backdrop-blur-md border-b;
+    background-color: rgba(var(--bg-primary), 0.8);
+    border-color: var(--card-border);
   }
-  ::-webkit-scrollbar-track {
-    @apply bg-slate-900;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-600;
-  }
+}
+
+/* Custom Animations */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s infinite ease-in-out;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

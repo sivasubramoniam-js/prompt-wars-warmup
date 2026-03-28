@@ -1,18 +1,20 @@
 import React from 'react';
-import { AlertTriangle, Share2, ShieldQuestion, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Share2, ShieldCheck, CheckCircle2, Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function SafetyCard({ data }) {
+  const { t } = useTranslation();
   if (!data) return null;
 
   const { urgency_level, immediate_actions, shareable_safety_card } = data;
 
   let colors = {
     bg: 'bg-green-500/10',
-    border: 'border-green-500/50',
-    text: 'text-green-500',
-    icon: <CheckCircle2 className="text-green-500 size-10" />,
+    border: 'border-green-500/20',
+    text: 'text-green-600 dark:text-green-400',
+    icon: <CheckCircle2 className="text-green-500" size={40} />,
     badge: 'bg-green-500',
-    gradient: 'from-green-500/20 to-transparent'
+    gradient: 'from-green-500/10 to-transparent'
   };
 
   const statusLower = (urgency_level || '').toLowerCase();
@@ -20,38 +22,38 @@ export default function SafetyCard({ data }) {
   if (statusLower === 'red') {
     colors = {
       bg: 'bg-red-500/10',
-      border: 'border-red-500/50',
-      text: 'text-red-500',
-      icon: <AlertTriangle className="text-red-500 size-10" />,
+      border: 'border-red-500/20',
+      text: 'text-red-600 dark:text-red-400',
+      icon: <AlertTriangle className="text-red-500" size={40} />,
       badge: 'bg-red-500',
-      gradient: 'from-red-500/20 to-transparent'
+      gradient: 'from-red-500/10 to-transparent'
     };
   } else if (statusLower === 'yellow') {
     colors = {
       bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/50',
-      text: 'text-yellow-500',
-      icon: <AlertTriangle className="text-yellow-500 size-10" />,
+      border: 'border-yellow-500/20',
+      text: 'text-yellow-600 dark:text-yellow-400',
+      icon: <AlertTriangle className="text-yellow-500" size={40} />,
       badge: 'bg-yellow-500',
-      gradient: 'from-yellow-500/20 to-transparent'
+      gradient: 'from-yellow-500/10 to-transparent'
     };
   }
 
   return (
-    <div className={`glass-panel border-2 ${colors.border} mt-8 overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-4 duration-700`}>
-      <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b ${colors.gradient} opacity-50 pointer-events-none`}></div>
+    <div className={`glass-panel border-l-8 ${colors.border} overflow-hidden relative animate-in fade-in slide-in-from-bottom-8 duration-700`}>
+      <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b ${colors.gradient} opacity-30 pointer-events-none`}></div>
       
-      <div className="relative z-10 p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-700/50">
-          <div className="flex items-center gap-5">
-            <div className={`p-4 rounded-2xl ${colors.bg} shadow-lg backdrop-blur-md border border-white/5`}>
+      <div className="relative z-10 p-6 sm:p-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-6">
+            <div className={`p-5 rounded-[2rem] ${colors.bg} shadow-inner border border-white/10`}>
               {colors.icon}
             </div>
             <div>
-              <p className="text-slate-400 text-sm font-medium uppercase tracking-widest mb-1">Disaster Response Analysis</p>
-              <h2 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                Status: <span className={colors.text}>{urgency_level.toUpperCase()}</span>
-                <span className="relative flex h-3 w-3 ml-2">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-50 mb-2 truncate">{t('urgency_level')}</p>
+              <h2 className={`text-4xl font-black tracking-tight flex items-center gap-4 ${colors.text}`}>
+                {urgency_level.toUpperCase()}
+                <span className="relative flex h-3 w-3">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${colors.badge}`}></span>
                   <span className={`relative inline-flex rounded-full h-3 w-3 ${colors.badge}`}></span>
                 </span>
@@ -60,37 +62,36 @@ export default function SafetyCard({ data }) {
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-12">
           <div>
-            <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
-              <ShieldQuestion size={24} className="text-blue-400" /> Immediate Life-Saving Actions
+            <h3 className="text-sm font-bold opacity-60 uppercase tracking-widest mb-6 flex items-center gap-3">
+              <ShieldCheck size={20} className="text-blue-500" /> {t('immediate_actions')}
             </h3>
-            <ul className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
               {immediate_actions && immediate_actions.map((action, idx) => (
-                <li key={idx} className="flex items-start gap-4 bg-slate-900/60 p-5 rounded-2xl border border-slate-700/50 hover:bg-slate-800/80 transition-colors shadow-inner">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-sm font-bold mt-0.5 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                <div key={idx} className="flex items-start gap-5 p-6 rounded-[1.5rem] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 hover:scale-[1.01] transition-transform">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-blue-500/20">
                     {idx + 1}
                   </span>
-                  <span className="text-slate-200 leading-relaxed text-lg font-medium">{action}</span>
-                </li>
+                  <p className="text-lg leading-relaxed font-semibold opacity-90">{action}</p>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
-          <div className="bg-slate-900/80 rounded-2xl p-6 border border-slate-700 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Share2 size={16} /> Shareable Summary
+          <div className="rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/40 relative overflow-hidden group shadow-inner">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 className="text-xs font-bold opacity-50 uppercase tracking-widest flex items-center gap-2">
+                <Share2 size={16} /> {t('shareable_card')}
               </h3>
               <button 
-                className="text-white hover:text-blue-400 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all shadow border border-slate-600 flex items-center gap-2 active:scale-95" 
+                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2" 
                 onClick={() => navigator.clipboard.writeText(shareable_safety_card)}
               >
-                Copy for WhatsApp
+                <Copy size={14} /> Copy for emergency broadcast
               </button>
             </div>
-            <p className="text-slate-200 text-lg leading-relaxed pt-2 pl-2 border-l-2 border-slate-700 ml-1">
+            <p className="text-xl italic font-serif leading-relaxed px-4 border-l-4 border-blue-500/50">
               "{shareable_safety_card}"
             </p>
           </div>
