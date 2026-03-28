@@ -52,7 +52,7 @@ export default function SafetyCard({ data }) {
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-50 mb-2 truncate">{t('urgency_level')}</p>
               <h2 className={`text-4xl font-black tracking-tight flex items-center gap-4 ${colors.text}`}>
-                {urgency_level.toUpperCase()}
+                {(urgency_level || 'Normal').toUpperCase()}
                 <span className="relative flex h-3 w-3">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${colors.badge}`}></span>
                   <span className={`relative inline-flex rounded-full h-3 w-3 ${colors.badge}`}></span>
