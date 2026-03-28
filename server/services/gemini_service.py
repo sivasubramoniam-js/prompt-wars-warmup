@@ -44,7 +44,7 @@ def analyze_emergency(text: str, image_path: str = None, audio_path: str = None)
 
     try:
         response = client.models.generate_content(
-            model='gemini-1.5-pro',
+            model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
