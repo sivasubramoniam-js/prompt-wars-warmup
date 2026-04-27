@@ -4,7 +4,7 @@ from flask_talisman import Talisman
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
-from services.gemini_service import analyze_emergency, enrich_signals
+from services.gemini_service import analyze_emergency, enrich_signals, search_global_disasters
 import os
 import logging
 import feedparser
@@ -138,46 +138,15 @@ def telegram_alert():
 
 @app.route('/api/signals', methods=['GET'])
 def get_signals():
-    range_days = request.args.get('range', '1')
-    signals = []
-    
-    usgs_feeds = {
-        "1": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.atom",
-        "7": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.atom",
-        "30": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.atom"
-    }
-    usgs_url = usgs_feeds.get(range_days, usgs_feeds["1"])
-
+    """AI Search-driven discovery engine."""
     try:
-        feed = feedparser.parse(usgs_url)
-        limit = 10 if range_days == "1" else 20
-        for entry in feed.entries[:limit]:
-            point = entry.get('georss_point', '0 0').split()
-            title = entry.title
-            signals.append({
-                "id": entry.id, "type": "EARTHQUAKE", "title": title,
-                "lat": float(point[0]), "lng": float(point[1]),
-                "severity": "Red" if any(v in title for v in ["M 6.", "M 7."]) else "Orange" if "M 5." in title else "Green",
-                "date": entry.updated[:16]
-            })
+        range_days = request.args.get('range', '1')
+        # Use the powerful AI Search Discovery Engine we built
+        signals = search_global_disasters(range_days)
+        return jsonify({"signals": signals})
     except Exception as e:
-        app.logger.warning(f"USGS Feed issue: {e}")
-
-    try:
-        gdacs_url = "https://www.gdacs.org/xml/rss.xml"
-        feed = feedparser.parse(gdacs_url)
-        for entry in feed.entries[:5]:
-            if hasattr(entry, 'geo_lat'):
-                signals.append({
-                    "id": entry.link, "type": "NATURAL", "title": entry.title,
-                    "lat": float(entry.geo_lat), "lng": float(entry.geo_long),
-                    "severity": "Red" if "Red" in entry.title else "Orange",
-                    "date": entry.published[:16] if hasattr(entry, 'published') else "N/A"
-                })
-    except: pass
-
-    enriched = enrich_signals(signals)
-    return jsonify({"signals": enriched})
+        app.logger.error(f"Search Discovery Failed: {e}")
+        return jsonify({"signals": []})
 
 @app.route('/api/weather', methods=['GET'])
 @limiter.limit("30 per minute")

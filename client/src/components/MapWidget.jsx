@@ -11,7 +11,7 @@ const mapContainerStyle = {
 };
 
 const worldViewDefault = {
-  lat: 20, 
+  lat: 20,
   lng: 10
 };
 
@@ -27,7 +27,7 @@ const darkStyles = [
 export default function MapWidget({ planText, userLocation, isLoaded }) {
   const { t } = useTranslation();
   const [signals, setSignals] = useState([]);
-  const [range, setRange] = useState('1'); 
+  const [range, setRange] = useState('1');
   const [hoveredSignal, setHoveredSignal] = useState(null);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
 
   useEffect(() => {
     fetchSignals();
-    const interval = setInterval(fetchSignals, 300000); 
+    const interval = setInterval(fetchSignals, 300000);
     return () => clearInterval(interval);
   }, [range]);
 
@@ -55,32 +55,32 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
 
   const handleTelegramNotify = async (signal) => {
     if (!telegramChatId) {
-       setTelegramStatus('error');
-       setTimeout(() => setTelegramStatus(null), 3000);
-       return;
+      setTelegramStatus('error');
+      setTimeout(() => setTelegramStatus(null), 3000);
+      return;
     }
     setTelegramStatus('sending');
     try {
-       await axios.post(`${API_URL}/api/telegram/alert`, {
-          signal,
-          chat_id: telegramChatId
-       });
-       setTelegramStatus('success');
-       setTimeout(() => setTelegramStatus(null), 3000);
+      await axios.post(`${API_URL}/api/telegram/alert`, {
+        signal,
+        chat_id: telegramChatId
+      });
+      setTelegramStatus('success');
+      setTimeout(() => setTelegramStatus(null), 3000);
     } catch (err) {
-       console.error("Telegram notification failed:", err);
-       setTelegramStatus('error');
-       setTimeout(() => setTelegramStatus(null), 3000);
+      console.error("Telegram notification failed:", err);
+      setTelegramStatus('error');
+      setTimeout(() => setTelegramStatus(null), 3000);
     }
   };
 
   const saveChatId = (id) => {
-     setTelegramChatId(id);
-     localStorage.setItem('sahay_telegram_chat_id', id);
+    setTelegramChatId(id);
+    localStorage.setItem('sahay_telegram_chat_id', id);
   };
 
   const getSignalColor = (type) => {
-    switch(type) {
+    switch (type) {
       case 'FIRE': return '#f97316';
       case 'EARTHQUAKE': return '#ef4444';
       case 'NATURAL': return '#3b82f6';
@@ -92,7 +92,7 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
   };
 
   const getSignalIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'FIRE': return <Flame size={14} className="text-orange-500" />;
       case 'EARTHQUAKE': return <Activity size={14} className="text-red-500" />;
       case 'NATURAL': return <Wind size={14} className="text-blue-500" />;
@@ -140,44 +140,44 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-           {/* Telegram Subscription Bar */}
-           <div className="flex items-center gap-3 p-2 pr-4 bg-slate-100 dark:bg-slate-900/80 rounded-[1.25rem] border border-slate-200 dark:border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
-                 <Send size={14} />
-              </div>
-              <input 
-                 type="text" 
-                 placeholder="Telegram Chat ID" 
-                 value={telegramChatId}
-                 onChange={(e) => saveChatId(e.target.value)}
-                 className="bg-transparent border-none outline-none text-[10px] font-black w-[120px] placeholder:opacity-40"
-              />
-              <span className="text-[8px] font-black uppercase opacity-30 mt-0.5 tracking-tighter cursor-help group relative">
-                 ?
-                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-slate-800 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] lowercase font-medium">Message @userinfobot to get your ID</span>
-              </span>
-           </div>
-
-            <div className="flex p-1 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800" role="group" aria-label="Time range results">
-               {rangeOptions.map((opt) => (
-                  <button
-                     key={opt.value}
-                     onClick={() => setRange(opt.value)}
-                     aria-pressed={range === opt.value}
-                     aria-label={`Show disasters from ${opt.label}`}
-                     className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${range === opt.value ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600' : 'opacity-40 hover:opacity-100'}`}
-                  >
-                     {opt.label}
-                  </button>
-               ))}
+          {/* Telegram Subscription Bar */}
+          <div className="flex items-center gap-3 p-2 pr-4 bg-slate-100 dark:bg-slate-900/80 rounded-[1.25rem] border border-slate-200 dark:border-slate-800">
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
+              <Send size={14} />
             </div>
+            <input
+              type="text"
+              placeholder="Telegram Chat ID"
+              value={telegramChatId}
+              onChange={(e) => saveChatId(e.target.value)}
+              className="bg-transparent border-none outline-none text-[10px] font-black w-[120px] placeholder:opacity-40"
+            />
+            <span className="text-[8px] font-black uppercase opacity-30 mt-0.5 tracking-tighter cursor-help group relative">
+              ?
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-slate-800 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] lowercase font-medium">Message @userinfobot to get your ID</span>
+            </span>
+          </div>
+
+          <div className="flex p-1 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800" role="group" aria-label="Time range results">
+            {rangeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setRange(opt.value)}
+                aria-pressed={range === opt.value}
+                aria-label={`Show disasters from ${opt.label}`}
+                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${range === opt.value ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600' : 'opacity-40 hover:opacity-100'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-      
+
       <div className="w-full h-[500px] rounded-[3.5rem] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl relative shadow-blue-500/5 group">
         {loading && (
           <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center">
-             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
         <GoogleMap
@@ -243,22 +243,22 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
                     {getSignalIcon(activeInfoWindowSignal.type)}
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{activeInfoWindowSignal.type}</span>
                   </div>
-                  <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${activeInfoWindowSignal.threat_level === 'Extreme' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
-                    {activeInfoWindowSignal.threat_level || 'N/A'} Threat
+                  <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${activeInfoWindowSignal.status === 'emergency' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                    {activeInfoWindowSignal.status || 'Active'}
                   </span>
                 </div>
                 <h4 className="font-bold text-sm leading-snug mb-2 italic">"{activeInfoWindowSignal.title}"</h4>
-                
-                {activeInfoWindowSignal.web_intelligence && (
-                   <div className="mb-3 p-3 bg-slate-50 border-l-[3px] border-blue-600 rounded-r-xl">
-                      <div className="flex items-center gap-2 mb-1.5 opacity-50">
-                         <Newspaper size={12} />
-                         <span className="text-[9px] font-black uppercase tracking-widest">Live Search Update</span>
-                      </div>
-                      <p className="text-[10px] leading-relaxed font-semibold">
-                         {activeInfoWindowSignal.web_intelligence}
-                      </p>
-                   </div>
+
+                {activeInfoWindowSignal.instruction && (
+                  <div className="mb-3 p-3 bg-slate-50 border-l-[3px] border-blue-600 rounded-r-xl">
+                    <div className="flex items-center gap-2 mb-1.5 opacity-50">
+                      <ShieldAlert size={12} />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Tactical Instruction</span>
+                    </div>
+                    <p className="text-[10px] leading-relaxed font-semibold">
+                      {activeInfoWindowSignal.instruction}
+                    </p>
+                  </div>
                 )}
 
                 {activeInfoWindowSignal.safety_guideline && (
@@ -269,15 +269,15 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
                     </p>
                   </div>
                 )}
-                
+
                 <p className="text-[8px] mt-3 opacity-30 font-bold uppercase tracking-widest text-right">{activeInfoWindowSignal.date}</p>
               </div>
             </InfoWindow>
           )}
 
           {userLocation && (
-            <Marker 
-              position={userLocation} 
+            <Marker
+              position={userLocation}
               zIndex={100}
               icon={{
                 path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',
@@ -294,85 +294,85 @@ export default function MapWidget({ planText, userLocation, isLoaded }) {
 
       <div className="mt-12">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 px-2 gap-4">
-           <div className="space-y-1">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2 opacity-50">
-                 <AlertTriangle size={14} className="text-amber-500" /> Ground-Truth Intelligence
-              </h4>
-              <p className="text-xs font-bold leading-none opacity-40">Connected to Satellite Feeds + Verified Web Context</p>
-           </div>
-           
-           <div className={`px-4 py-2 rounded-2xl flex items-center gap-3 border transition-all duration-500 ${telegramStatus === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-600' : telegramStatus === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-600' : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-60'}`}>
-              <div className={`w-2 h-2 rounded-full ${telegramStatus === 'success' ? 'bg-green-500' : telegramStatus === 'error' ? 'bg-red-500' : telegramStatus === 'sending' ? 'bg-blue-500 animate-ping' : 'bg-slate-400'}`}></div>
-              <span className="text-[9px] font-black uppercase tracking-widest leading-none">
-                 {telegramStatus === 'success' ? 'Uplink Sent' : telegramStatus === 'error' ? 'Check ID' : telegramStatus === 'sending' ? 'Transmitting...' : 'Telegram Service Ready'}
-              </span>
-           </div>
+          <div className="space-y-1">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2 opacity-50">
+              <AlertTriangle size={14} className="text-amber-500" /> Ground-Truth Intelligence
+            </h4>
+            <p className="text-xs font-bold leading-none opacity-40">Connected to Satellite Feeds + Verified Web Context</p>
+          </div>
+
+          <div className={`px-4 py-2 rounded-2xl flex items-center gap-3 border transition-all duration-500 ${telegramStatus === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-600' : telegramStatus === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-600' : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-60'}`}>
+            <div className={`w-2 h-2 rounded-full ${telegramStatus === 'success' ? 'bg-green-500' : telegramStatus === 'error' ? 'bg-red-500' : telegramStatus === 'sending' ? 'bg-blue-500 animate-ping' : 'bg-slate-400'}`}></div>
+            <span className="text-[9px] font-black uppercase tracking-widest leading-none">
+              {telegramStatus === 'success' ? 'Uplink Sent' : telegramStatus === 'error' ? 'Check ID' : telegramStatus === 'sending' ? 'Transmitting...' : 'Telegram Service Ready'}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-           {signals.length > 0 ? signals.map((sig) => (
-             <div
-               key={sig.id}
-               className={`text-left p-8 rounded-[2.5rem] border transition-all duration-300 flex flex-col gap-5 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 ${selectedSignal?.id === sig.id ? 'ring-2 ring-blue-500/20 shadow-xl' : ''}`}
-             >
-                <div className="flex items-start justify-between w-full">
-                   <div className="flex items-center gap-4 cursor-pointer" onClick={() => onDisasterClick(sig)}>
-                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 shadow-sm transition-transform hover:scale-110">
-                         {getSignalIcon(sig.type)}
-                      </div>
-                      <div>
-                         <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block">{sig.type}</span>
-                         <h5 className="text-[13px] font-black leading-snug max-w-[220px]">{sig.title}</h5>
-                      </div>
-                   </div>
-                   <div className="flex flex-col items-end gap-2">
-                     <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${sig.threat_level === 'Extreme' ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-500/20' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-80'}`}>
-                        {sig.threat_level || 'Active'}
-                     </div>
-                     {/* Telegram Dispatch Button */}
-                     <button 
-                       onClick={() => handleTelegramNotify(sig)}
-                       disabled={telegramStatus === 'sending'}
-                       className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95 disabled:opacity-50"
-                       title="Dispatch to Telegram"
-                       aria-label={`Dispatch alert for ${sig.title} to Telegram`}
-                     >
-                        <Send size={14} />
-                     </button>
-                   </div>
+          {signals.length > 0 ? signals.map((sig) => (
+            <div
+              key={sig.id}
+              className={`text-left p-8 rounded-[2.5rem] border transition-all duration-300 flex flex-col gap-5 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 ${selectedSignal?.id === sig.id ? 'ring-2 ring-blue-500/20 shadow-xl' : ''}`}
+            >
+              <div className="flex items-start justify-between w-full">
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => onDisasterClick(sig)}>
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 shadow-sm transition-transform hover:scale-110">
+                    {getSignalIcon(sig.type)}
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block">{sig.type}</span>
+                    <h5 className="text-[13px] font-black leading-snug max-w-[220px]">{sig.title}</h5>
+                  </div>
                 </div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${sig.threat_level === 'Extreme' ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-500/20' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-80'}`}>
+                    {sig.threat_level || 'Active'}
+                  </div>
+                  {/* Telegram Dispatch Button */}
+                  <button
+                    onClick={() => handleTelegramNotify(sig)}
+                    disabled={telegramStatus === 'sending'}
+                    className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95 disabled:opacity-50"
+                    title="Dispatch to Telegram"
+                    aria-label={`Dispatch alert for ${sig.title} to Telegram`}
+                  >
+                    <Send size={14} />
+                  </button>
+                </div>
+              </div>
 
-                {sig.web_intelligence && (
-                   <div className="p-4 bg-white dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-3xl">
-                      <div className="flex items-center gap-2 mb-2 opacity-30">
-                         <Globe size={12} />
-                         <span className="text-[9px] font-black uppercase tracking-widest leading-none">Verified Update</span>
-                      </div>
-                      <p className="text-[11px] leading-relaxed font-bold italic">
-                         "{sig.web_intelligence}"
-                      </p>
-                   </div>
-                )}
+              {sig.web_intelligence && (
+                <div className="p-4 bg-white dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-3xl">
+                  <div className="flex items-center gap-2 mb-2 opacity-30">
+                    <Globe size={12} />
+                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">Verified Update</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed font-bold italic">
+                    "{sig.web_intelligence}"
+                  </p>
+                </div>
+              )}
 
-                {sig.safety_guideline && (
-                   <div className="mt-auto pt-5 border-t border-slate-200 dark:border-slate-800 flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-600/20">
-                         <ShieldCheck size={16} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wide">
-                            Mission Directive: {sig.safety_guideline}
-                        </p>
-                      </div>
-                   </div>
-                )}
-             </div>
-           )) : (
-             <div className="col-span-full py-20 text-center opacity-20">
-                <Calendar size={48} className="mx-auto mb-4" />
-                <p className="font-black uppercase tracking-widest text-xs">Synchronizing with Satellite Intelligence...</p>
-             </div>
-           )}
+              {sig.safety_guideline && (
+                <div className="mt-auto pt-5 border-t border-slate-200 dark:border-slate-800 flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-600/20">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wide">
+                      Mission Directive: {sig.safety_guideline}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )) : (
+            <div className="col-span-full py-20 text-center opacity-20">
+              <Calendar size={48} className="mx-auto mb-4" />
+              <p className="font-black uppercase tracking-widest text-xs">Synchronizing with Satellite Intelligence...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
